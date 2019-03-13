@@ -1,37 +1,49 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class NavMeshScript : MonoBehaviour
 {
+  public NavMeshSurface NavMeshSurface;
+  public GameObject CameraTracker;
+  public LineRenderer LineRenderer;
+  public Vector3 destination;
+  public Vector3[] corners;
+  public bool pointFound;
 
-    public NavMeshSurface NavMeshSurface;
-    public GameObject CameraTracker;
-    public LineRenderer LineRenderer;
-    private NavMeshAgent _agent;
-    Vector3 destination = new Vector3(1, 1, 1);
-    public bool destinationSet = false;
-
-    void Start()
+  void Start()
+  {
+    NavMeshHit hit;
+    pointFound = NavMesh.SamplePosition(new Vector3(1, 1, 1), out hit, 3.0f, NavMesh.AllAreas);
+    if (pointFound)
     {
-        _agent = CameraTracker.GetComponent<NavMeshAgent>();
+      destination = hit.position;
     }
-    // Update is called once per frame
-	void Update () {
-		NavMeshSurface.BuildNavMesh();
-	    try
-	    {
-	        destinationSet = _agent.SetDestination(destination);
-	    }
-	    catch
-	    {
+  }
 
-	    }
-	    if (_agent.hasPath)
-	    {
-            LineRenderer.SetPositions(_agent.path.corners);
-	    }
-	}
+  // Update is called once per frame
+  void Update()
+  {
+    NavMeshSurface.BuildNavMesh();
+    if (!pointFound)
+    {
+      NavMeshHit hit;
+      pointFound = NavMesh.SamplePosition(new Vector3(1, 1, 1), out hit, 3.0f, NavMesh.AllAreas);
+
+      destination = hit.position;
+    }
+
+    NavMeshPath path = new NavMeshPath();
+
+    if (pointFound)
+    {
+      NavMesh.CalculatePath(CameraTracker.transform.position, destination, NavMesh.AllAreas, path);
+    }
+
+    if (path.corners.Length > 0)
+    {
+      corners = path.corners;
+      LineRenderer.positionCount = path.corners.Length;
+      LineRenderer.SetPositions(path.corners);
+    }
+  }
 }
