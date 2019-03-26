@@ -40,9 +40,6 @@ namespace MagicLeap
         [SerializeField, Space, Tooltip("The text to place mesh data on.")]
         private Text _statusLabel;
 
-        [SerializeField, Space, Tooltip("Prefab to shoot into the scene.")]
-        private GameObject _shootingPrefab;
-
         [SerializeField, Space, Tooltip("ControllerConnectionHandler reference.")]
         private ControllerConnectionHandler _controllerConnectionHandler;
 
@@ -52,10 +49,6 @@ namespace MagicLeap
         private static readonly Vector3 _boundedExtentsSize = new Vector3(2.0f, 2.0f, 2.0f);
         private static readonly Vector3 _boundlessExtentsSize = new Vector3(10.0f, 10.0f, 10.0f);
 
-        private const float SHOOTING_FORCE = 300.0f;
-        private const float MIN_BALL_SIZE = 0.2f;
-        private const float MAX_BALL_SIZE = 0.5f;
-        private const int BALL_LIFE_TIME = 10;
 
         private Camera _camera;
         #endregion
@@ -90,12 +83,6 @@ namespace MagicLeap
                 enabled = false;
                 return;
             }
-            if (_shootingPrefab == null)
-            {
-                Debug.LogError("Error: MeshingExample._shootingPrefab is not set, disabling script.");
-                enabled = false;
-                return;
-            }
             if (_controllerConnectionHandler == null)
             {
                 Debug.LogError("Error MeshingExample._controllerConnectionHandler not set, disabling script.");
@@ -108,7 +95,6 @@ namespace MagicLeap
             _camera = Camera.main;
 
             MLInput.OnControllerButtonDown += OnButtonDown;
-            MLInput.OnTriggerDown += OnTriggerDown;
             MLInput.OnControllerTouchpadGestureStart += OnTouchpadGestureStart;
             MagicLeapDevice.RegisterOnHeadTrackingMapEvent(OnHeadTrackingMapEvent);
         }
@@ -142,7 +128,6 @@ namespace MagicLeap
         {
             MagicLeapDevice.UnregisterOnHeadTrackingMapEvent(OnHeadTrackingMapEvent);
             MLInput.OnControllerTouchpadGestureStart -= OnTouchpadGestureStart;
-            MLInput.OnTriggerDown -= OnTriggerDown;
             MLInput.OnControllerButtonDown -= OnButtonDown;
         }
         #endregion
@@ -184,36 +169,6 @@ namespace MagicLeap
                 }
 
                 UpdateStatusText();
-            }
-        }
-
-        /// <summary>
-        /// Handles the event for trigger down. Throws a ball in the direction of
-        /// the camera's forward vector.
-        /// </summary>
-        /// <param name="controllerId">The id of the controller.</param>
-        /// <param name="button">The button that is being released.</param>
-        private void OnTriggerDown(byte controllerId, float value)
-        {
-            if (_controllerConnectionHandler.IsControllerValid(controllerId))
-            {
-                // TODO: Use pool object instead of instantiating new object on each trigger down.
-                // Create the ball and necessary components and shoot it along raycast.
-                GameObject ball = Instantiate(_shootingPrefab);
-
-                ball.SetActive(true);
-                float ballsize = Random.Range(MIN_BALL_SIZE, MAX_BALL_SIZE);
-                ball.transform.localScale = new Vector3(ballsize, ballsize, ballsize);
-                ball.transform.position = _camera.gameObject.transform.position;
-
-                Rigidbody rigidBody = ball.GetComponent<Rigidbody>();
-                if (rigidBody == null)
-                {
-                    rigidBody = ball.AddComponent<Rigidbody>();
-                }
-                rigidBody.AddForce(_camera.gameObject.transform.forward * SHOOTING_FORCE);
-
-                Destroy(ball, BALL_LIFE_TIME);
             }
         }
 
