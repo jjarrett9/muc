@@ -10,7 +10,8 @@ public class NavMeshScript : MonoBehaviour
   public Vector3 Destination;
   public Vector3[] Corners;
 
-  private readonly Vector3 _objectLocation = new Vector3(1, 1, 1);
+  private Vector3 _objectLocation = new Vector3(1, 1, 1);
+  private Vector3 _nextObject;
   private GameObject _destinationMark;
   private bool _pointFound;
 

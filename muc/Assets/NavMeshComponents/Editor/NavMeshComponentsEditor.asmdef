@@ -5,8 +5,7 @@
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [
-        "Editor",
-        "Lumin"
+        "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false
