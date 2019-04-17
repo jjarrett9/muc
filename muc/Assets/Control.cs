@@ -11,13 +11,7 @@ public class Control : MonoBehaviour
         JustReleased
     };
     public ButtonStates BtnState;
-    #endregion
-
-    #region Private Variables
-    private const float TIME_MESH_SCANNING_TOGGLE = 3.0f;
-    private bool _held = false;
-    private float _startTime = 0.0f;
-    private MeshingScript _meshing;
+  public NavMeshScript NavMeshScript;
     #endregion
 
     #region Unity Methods
@@ -29,9 +23,6 @@ public class Control : MonoBehaviour
         // Add button callbacks
         MLInput.OnControllerButtonDown += HandleOnButtonDown;
         MLInput.OnControllerButtonUp += HandleOnButtonUp;
-
-        // Assign meshing component
-        _meshing = GetComponent<MeshingScript>();
 
         // Initial State of the Control is Normal
         BtnState = ButtonStates.Normal;
@@ -49,39 +40,10 @@ public class Control : MonoBehaviour
 
     private void Update()
     {
-        // Bumper button held down - toggle scanning if timer reaches max
-        if (GetTime() >= TIME_MESH_SCANNING_TOGGLE && BtnState == ButtonStates.Pressed)
+        if (BtnState == ButtonStates.Pressed)
         {
-            _held = true;
-            _startTime = Time.time;
-            _meshing.ToggleMeshScanning();
+            NavMeshScript.UpdateDestination();
         }
-        // Bumper was just released - toggle visibility
-        else if (BtnState == ButtonStates.JustReleased)
-        {
-            BtnState = ButtonStates.Normal;
-            _startTime = 0.0f;
-            if (!_held)
-            {
-                _meshing.ToggleMeshVisibility();
-            }
-            else
-            {
-                _held = false;
-            }
-        }
-    }
-    #endregion
-
-    #region Private Methods
-    public float GetTime()
-    {
-        float returnTime = -1.0f;
-        if (_startTime > 0.0f)
-        {
-            returnTime = Time.time - _startTime;
-        }
-        return returnTime;
     }
     #endregion
 
@@ -101,7 +63,6 @@ public class Control : MonoBehaviour
         if (button == MLInputControllerButton.Bumper)
         {
             // Start bumper timer
-            _startTime = Time.time;
             BtnState = ButtonStates.Pressed;
         }
     }
